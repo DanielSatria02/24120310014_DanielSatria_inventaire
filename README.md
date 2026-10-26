@@ -22,6 +22,47 @@ plain table queries.
 The database has not yet been created and migrations have not yet been run.
 The `.env` file contains machine-specific settings and should not be committed.
 
+## Application architecture
+
+The path `app/Http/Controllers` is Laravel's conventional location for HTTP
+controllers. `Http` and `Controllers` are nested directories, and the matching
+PHP namespace is `App\Http\Controllers`. This is a framework path, not a
+complete architecture on its own.
+
+The project keeps Laravel's normal entry points while organizing inventory
+code into Clean Architecture-style layers:
+
+```text
+app/
+  Application/
+    Inventory/                  Inventory use cases and application workflows
+  Domain/
+    Inventory/                  Inventory business rules and domain types
+  Http/
+    Controllers/
+      Inventory/                Laravel controllers (HTTP adapters)
+  Infrastructure/
+    Persistence/
+      Eloquent/                 Eloquent models and persistence implementations
+  Models/                       Existing Laravel models (such as User)
+database/
+  migrations/                   Database schema changes
+resources/
+  views/
+    layouts/                    Shared Blade layouts
+    pages/                      Blade page templates
+routes/
+  web.php                       Web URLs mapped to controller actions
+```
+
+Keep the domain independent of Laravel, HTTP, and database details. Application
+use cases coordinate domain behavior through interfaces; infrastructure
+implements those interfaces using Eloquent/MySQL. Controllers translate web
+requests into use-case calls and return views or other responses. This keeps
+framework and persistence details at the edges. The folders are scaffolding;
+inventory-specific rules and classes should be added when their requirements
+are known. Laravel's default `app/Models/User.php` remains in place.
+
 ## Requirements
 
 - XAMPP with PHP 8.2 or newer and MySQL/MariaDB
