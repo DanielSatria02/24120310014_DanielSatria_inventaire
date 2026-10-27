@@ -93,6 +93,30 @@ The login page is at `/login` and the registration page is at `/register`.
 Registration currently creates a basic account; company setup, invitations,
 and manager/employee roles are not implemented yet.
 
+### Google sign-in
+
+Login and registration also offer **Continue with Google**. Google returns a
+verified email: if it already belongs to an Inventaire account, the user is
+signed into that account; otherwise, a new account is created automatically.
+The Google button works after OAuth credentials are added to `.env`.
+
+To configure local development:
+
+1. Create a Google OAuth client ID in Google Cloud Console (OAuth client type:
+   **Web application**).
+2. Add `http://127.0.0.1:8000/auth/google/callback` as an authorized redirect
+   URI for the client.
+3. Add the client ID and secret to `.env`:
+
+   ```env
+   GOOGLE_CLIENT_ID=your-client-id
+   GOOGLE_CLIENT_SECRET=your-client-secret
+   GOOGLE_REDIRECT_URI=http://127.0.0.1:8000/auth/google/callback
+   ```
+
+4. Run `php artisan config:clear` if the server was already running, then try
+   the Google button. Keep the OAuth secret private and never commit `.env`.
+
 ### Through XAMPP Apache
 
 Start Apache in the XAMPP Control Panel, then visit

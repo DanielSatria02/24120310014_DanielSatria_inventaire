@@ -8,6 +8,10 @@
         <h1 id="form-title">Create your account</h1>
         <p class="auth-description">Set up your access to Inventaire.</p>
 
+        @if (session('status'))
+            <div class="notice notice-success" role="status">{{ session('status') }}</div>
+        @endif
+
         <form method="POST" action="{{ route('register.store') }}" class="auth-form">
             @csrf
 
@@ -50,6 +54,12 @@
 
             <button class="button-primary" type="submit">Create account</button>
         </form>
+
+        <div class="auth-divider"><span>OR</span></div>
+        <a class="google-button" href="{{ route('auth.google.redirect') }}">
+            <img src="{{ asset('images/gmailLogo.png') }}" alt="" aria-hidden="true">
+            <span>Continue with Google</span>
+        </a>
 
         <p class="auth-switch">Already have an account? <a href="{{ route('login') }}">Log in</a></p>
         <p class="provisioning-note">Company setup and manager/employee roles will be added in a later step.</p>

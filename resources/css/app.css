@@ -272,6 +272,54 @@ body.auth-page {
     background: #f5f7f4;
 }
 
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin: 1.25rem 0;
+    color: #8a938c;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    height: 1px;
+    flex: 1;
+    background: #e6e9e3;
+    content: '';
+}
+
+.google-button {
+    display: flex;
+    width: 100%;
+    min-height: 2.9rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid #dce2dc;
+    border-radius: 0.65rem;
+    background: #fff;
+    color: #344239;
+    font-size: 0.9rem;
+    font-weight: 650;
+    text-decoration: none;
+    transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.google-button:hover {
+    border-color: #c8d1c9;
+    background: #f8faf8;
+}
+
+.google-button img {
+    width: 1.2rem;
+    height: 1.2rem;
+    object-fit: contain;
+}
+
 .auth-switch {
     margin: 1.5rem 0 0;
     color: #6b756d;

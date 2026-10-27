@@ -45,6 +45,12 @@
             <button class="button-primary" type="submit">Log in</button>
         </form>
 
+        <div class="auth-divider"><span>OR</span></div>
+        <a class="google-button" href="{{ route('auth.google.redirect') }}">
+            <img src="{{ asset('images/gmailLogo.png') }}" alt="" aria-hidden="true">
+            <span>Continue with Google</span>
+        </a>
+
         <p class="auth-switch">New to Inventaire? <a href="{{ route('register') }}">Create an account</a></p>
     </section>
 @endsection
