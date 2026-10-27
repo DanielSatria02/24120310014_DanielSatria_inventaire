@@ -44,7 +44,7 @@ app/
   Infrastructure/
     Persistence/
       Eloquent/                 Eloquent models and persistence implementations
-  Models/                       Existing Laravel models (such as User)
+  Models/                       Eloquent models (User, Category, Product, StockMovement)
 database/
   migrations/                   Database schema changes
 resources/
