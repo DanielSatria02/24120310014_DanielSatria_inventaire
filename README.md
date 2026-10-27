@@ -73,13 +73,25 @@ are known. Laravel's default `app/Models/User.php` remains in place.
 
 ### Recommended: Laravel development server
 
-Open a terminal in the project directory and run:
+Open two terminals in the project directory. In the first, start Laravel:
 
 ```powershell
 php artisan serve
 ```
 
-Then visit <http://127.0.0.1:8000>.
+In the second, start Vite so frontend assets are rebuilt as you edit:
+
+```powershell
+npm run dev
+```
+
+Keep both terminals running, then visit <http://127.0.0.1:8000>. To stop either
+server, press `Ctrl+C` in its terminal. For a one-time production-style asset
+build instead of Vite's development server, run `npm run build`.
+
+The login page is at `/login` and the registration page is at `/register`.
+Registration currently creates a basic account; company setup, invitations,
+and manager/employee roles are not implemented yet.
 
 ### Through XAMPP Apache
 
