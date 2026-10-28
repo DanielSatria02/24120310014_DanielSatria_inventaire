@@ -19,7 +19,7 @@
             </svg>
         </button>
 
-        <a class="brand header-brand" href="{{ route('dashboard') }}" aria-label="Inventaire dashboard">
+        <a class="brand header-brand" href="{{ route($user->isManager() ? 'dashboard' : 'home') }}" aria-label="Inventaire home">
             <span class="brand-mark" aria-hidden="true">i</span>
             <span class="header-brand-name">inventaire</span>
         </a>
@@ -45,11 +45,10 @@
             </button>
         </div>
 
-        @foreach ([
-            ['dashboard', 'Dashboard'],
-            ['account.edit', 'Edit account'],
-            ['employees.create', 'Add employee'],
-        ] as [$routeName, $label])
+        @php($menuItems = $user->isManager()
+            ? [['dashboard', 'Dashboard'], ['account.edit', 'Edit account'], ['employees.create', 'Add employee']]
+            : [['home', 'Home']])
+        @foreach ($menuItems as [$routeName, $label])
             @if (request()->routeIs($routeName))
                 <span class="side-link is-active" aria-current="page">{{ $label }}</span>
             @else

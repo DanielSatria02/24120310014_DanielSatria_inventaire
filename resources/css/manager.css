@@ -328,6 +328,79 @@ button.side-link:hover {
     margin-bottom: 1rem;
 }
 
+.toolbar-end {
+    justify-content: flex-end;
+}
+
+.button-outline {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid #cfe0d3;
+    border-radius: 0.55rem;
+    background: #fff;
+    color: #2a6040;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 650;
+    transition: background-color 140ms ease;
+}
+
+.button-outline:hover {
+    background: #eef4ee;
+}
+
+.form-field select {
+    width: 100%;
+    min-height: 2.85rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid #dce2dc;
+    border-radius: 0.65rem;
+    background: #fff;
+    font: inherit;
+    font-size: 0.92rem;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.row-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.button-danger {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid #efc9c6;
+    border-radius: 0.55rem;
+    background: #fff;
+    color: #ad3636;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 650;
+    transition: background-color 140ms ease;
+}
+
+.button-danger:hover {
+    background: #fdeceb;
+}
+
+.modal-actions .button-danger-solid {
+    min-height: 2.85rem;
+    margin: 0;
+    padding: 0 1.3rem;
+    border-color: #ad3636;
+    background: #ad3636;
+    color: #fff;
+}
+
+.modal-actions .button-danger-solid:hover {
+    background: #922c2c;
+}
+
 /* Product list */
 .product-table {
     width: 100%;

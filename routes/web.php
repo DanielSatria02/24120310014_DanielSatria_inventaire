@@ -5,7 +5,9 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Inventory\DashboardController;
+use App\Http\Controllers\Inventory\EmployeeController;
 use App\Http\Controllers\Inventory\ProductController;
+use App\Http\Controllers\Inventory\StockMovementController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/home');
@@ -28,6 +30,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
         Route::view('/account', 'pages.manager.account')->name('account.edit');
-        Route::view('/employees', 'pages.manager.employees')->name('employees.create');
+
+        Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.create');
+        Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+        Route::put('/employees/{employee}/password', [EmployeeController::class, 'updatePassword'])
+            ->middleware('throttle:6,1')
+            ->name('employees.password');
+        Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])
+            ->middleware('throttle:6,1')
+            ->name('employees.destroy');
+    });
+
+    Route::middleware('role:employee')->group(function () {
+        Route::post('/products/{product}/movements', [StockMovementController::class, 'store'])
+            ->middleware('throttle:60,1')
+            ->name('movements.store');
     });
 });

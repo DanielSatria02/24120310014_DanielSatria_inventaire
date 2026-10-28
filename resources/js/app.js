@@ -31,6 +31,23 @@ if (drawer) {
     });
 }
 
+document.querySelectorAll('[data-movement-form]').forEach((form) => {
+    const type = form.querySelector('[data-movement-type]');
+    const inboundOnly = form.querySelector('[data-inbound-only]');
+    const outboundOnly = form.querySelector('[data-outbound-only]');
+    const price = form.querySelector('[data-movement-price]');
+
+    const sync = () => {
+        const inbound = type.value === 'inbound';
+        inboundOnly.hidden = !inbound;
+        outboundOnly.hidden = inbound;
+        price.required = inbound;
+    };
+
+    type.addEventListener('change', sync);
+    sync();
+});
+
 document.querySelectorAll('[data-dialog-open]').forEach((button) => {
     button.addEventListener('click', () => {
         document.getElementById(button.dataset.dialogOpen)?.showModal();

@@ -39,8 +39,31 @@ The `.env` file contains machine-specific settings and should not be committed.
   - **Inventory valuation**: sum of `stockQuantity x purchasePrice`.
   - A searchable product list and an **Add item** popup (validated on the
     server; the SKU must be unique inside the company).
-- The header menu (top left) opens a sliding drawer with Edit account, Add
-  employee (both placeholders for now) and Log out.
+- The header menu (top left) opens a sliding drawer with Dashboard, Edit
+  account, Add employee and Log out. The page you are on is highlighted and
+  not clickable. Edit account is a placeholder for now.
+- **Employee home** (`/home` for employees): same three summary cards and
+  searchable product list as the manager sees, but no Add item and no Add
+  employee. Each product has **Update stock**, which records a movement:
+  - *Shipped out / sold*: stock goes down and the amount (quantity x the
+    product's selling price) is added to **revenue**.
+  - *Restocked / purchased*: stock goes up and the amount (quantity x the
+    purchase price the employee types) is added to **expenses**.
+  - Shipping more than is in stock is rejected and nothing changes. The stock
+    row is locked inside a database transaction, so two employees cannot
+    oversell the same item.
+  Employees only see their own company's products and cannot change anything
+  else about them.
+- Managers can **change an employee's password** (they must enter their own
+  password; the employee is signed out everywhere).
+- **Employees** (`/employees`): managers add an employee (name, email,
+  password) through a popup. The account is created with the `employee` role
+  in the manager's company. To delete one, the manager must re-enter their
+  own password. Only employees of the same company can be deleted, and not
+  ones that already have recorded stock movements (to keep the ledger intact).
+- **Password policy** (registration and employees), following OWASP/ASVS:
+  12 to 64 characters, no forced symbol or case rules, no leading or trailing
+  space, and not the same as the email. Passwords are stored hashed.
 - Amounts show as "Rp". Change `app/Support/Money.php` to use another currency.
 - New migrations: `companies`, plus company/role on users and company/prices on
   products and stock movements.
