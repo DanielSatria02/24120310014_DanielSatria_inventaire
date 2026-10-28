@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 use Tests\TestCase;
 
@@ -22,6 +24,7 @@ class AuthenticationTest extends TestCase
     {
         $response = $this->post('/register', [
             'name' => 'Taylor Example',
+            'company_name' => 'Taylor Traders',
             'email' => 'taylor@example.com',
             'password' => 'secure-password',
             'password_confirmation' => 'secure-password',
@@ -32,8 +35,33 @@ class AuthenticationTest extends TestCase
         $this->assertDatabaseHas('users', [
             'name' => 'Taylor Example',
             'email' => 'taylor@example.com',
+            'role' => 'manager',
         ]);
-        $this->assertTrue(Hash::check('secure-password', User::firstOrFail()->password));
+        $this->assertDatabaseHas('companies', ['name' => 'Taylor Traders']);
+        $user = User::firstOrFail();
+        $this->assertSame('Taylor Traders', $user->company->name);
+        $this->assertTrue(Hash::check('secure-password', $user->password));
+    }
+
+    public function test_expired_csrf_token_redirects_to_login_with_a_message(): void
+    {
+        Route::middleware('web')->post('/_csrf-expired', fn () => throw new TokenMismatchException);
+
+        $this->post('/_csrf-expired')
+            ->assertRedirect('/login')
+            ->assertSessionHas('status');
+    }
+
+    public function test_registration_requires_a_company_name(): void
+    {
+        $this->from('/register')->post('/register', [
+            'name' => 'Taylor Example',
+            'email' => 'taylor@example.com',
+            'password' => 'secure-password',
+            'password_confirmation' => 'secure-password',
+        ])->assertSessionHasErrors('company_name');
+
+        $this->assertDatabaseCount('users', 0);
     }
 
     public function test_registration_requires_a_unique_email_and_matching_password_confirmation(): void
@@ -88,6 +116,9 @@ class AuthenticationTest extends TestCase
             'name' => 'New User',
         ]);
         $this->assertNotNull(User::query()->where('email', 'new.user@gmail.com')->value('email_verified_at'));
+        $user = User::where('email', 'new.user@gmail.com')->firstOrFail();
+        $this->assertSame('manager', $user->role);
+        $this->assertNotNull($user->company);
     }
 
     public function test_google_sign_in_uses_an_existing_account_with_the_same_email(): void

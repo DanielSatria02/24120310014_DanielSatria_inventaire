@@ -5,14 +5,20 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    public const ROLE_MANAGER = 'manager';
+
+    public const ROLE_EMPLOYEE = 'employee';
 
     protected $primaryKey = 'userID';
 
@@ -36,6 +42,26 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'companyID', 'companyID');
+    }
+
+    public function isManager(): bool
+    {
+        return $this->role === self::ROLE_MANAGER;
+    }
+
+    public function initials(): string
+    {
+        return Str::of($this->name)
+            ->explode(' ')
+            ->filter()
+            ->take(2)
+            ->map(fn (string $part) => Str::upper(Str::substr($part, 0, 1)))
+            ->implode('');
+    }
 
     public function stockMovements(): HasMany
     {

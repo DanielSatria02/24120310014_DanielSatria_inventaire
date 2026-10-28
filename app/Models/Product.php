@@ -16,7 +16,27 @@ class Product extends Model
         'name',
         'stockQuantity',
         'minStockLevel',
+        'purchasePrice',
+        'sellingPrice',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'purchasePrice' => 'decimal:2',
+            'sellingPrice' => 'decimal:2',
+        ];
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'companyID', 'companyID');
+    }
+
+    public function isLowOnStock(): bool
+    {
+        return $this->stockQuantity <= $this->minStockLevel;
+    }
 
     public function category(): BelongsTo
     {

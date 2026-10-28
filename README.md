@@ -19,8 +19,31 @@ plain table queries.
   a Windows directory junction. The source code stays in this repository;
   Apache serves the public entry point.
 
-The database has not yet been created and migrations have not yet been run.
+The `inventaire` database exists and migrations are run with
+`php artisan migrate`.
 The `.env` file contains machine-specific settings and should not be committed.
+
+## Companies, roles and the manager dashboard
+
+- Registering creates a **company** (you type its name) and a **manager**
+  account that belongs to it. Google sign-in does the same for new emails,
+  using "{Name}'s Company" as the default name.
+- Every user has a `role` (`manager` or `employee`). Employees will be added
+  by managers later.
+- Products and stock movements belong to a company, so one company never sees
+  another company's data.
+- `/dashboard` is protected by login plus the `role:manager` middleware
+  (employees get 403). It shows:
+  - **Revenue**: sum of `totalAmount` of outbound movements.
+  - **Expenses**: sum of `totalAmount` of inbound movements.
+  - **Inventory valuation**: sum of `stockQuantity x purchasePrice`.
+  - A searchable product list and an **Add item** popup (validated on the
+    server; the SKU must be unique inside the company).
+- The header menu (top left) opens a sliding drawer with Edit account, Add
+  employee (both placeholders for now) and Log out.
+- Amounts show as "Rp". Change `app/Support/Money.php` to use another currency.
+- New migrations: `companies`, plus company/role on users and company/prices on
+  products and stock movements.
 
 ## Application architecture
 

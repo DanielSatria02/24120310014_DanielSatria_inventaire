@@ -26,6 +26,16 @@
             </div>
 
             <div class="form-field">
+                <label for="company_name">Company name</label>
+                <input id="company_name" name="company_name" type="text" value="{{ old('company_name') }}"
+                    autocomplete="organization" required
+                    class="@error('company_name') input-error @enderror">
+                @error('company_name')
+                    <p class="field-error">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="form-field">
                 <label for="email">Work email</label>
                 <input id="email" name="email" type="email" value="{{ old('email') }}"
                     autocomplete="email" required
@@ -62,6 +72,6 @@
         </a>
 
         <p class="auth-switch">Already have an account? <a href="{{ route('login') }}">Log in</a></p>
-        <p class="provisioning-note">Company setup and manager/employee roles will be added in a later step.</p>
+        <p class="provisioning-note">Signing up creates a manager account for your company. Employees are added by their manager.</p>
     </section>
 @endsection

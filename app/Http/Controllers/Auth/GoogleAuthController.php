@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -35,12 +37,21 @@ class GoogleAuthController extends Controller
             ->first();
 
         if ($user === null) {
-            $user = new User;
-            $user->name = $googleUser->getName() ?: Str::before($email, '@');
-            $user->email = $email;
-            $user->password = Str::random(64);
-            $user->email_verified_at = now();
-            $user->save();
+            $user = DB::transaction(function () use ($googleUser, $email) {
+                $name = $googleUser->getName() ?: Str::before($email, '@');
+                $company = Company::create(['name' => $name."'s Company"]);
+
+                $user = new User;
+                $user->companyID = $company->companyID;
+                $user->role = User::ROLE_MANAGER;
+                $user->name = $name;
+                $user->email = $email;
+                $user->password = Str::random(64);
+                $user->email_verified_at = now();
+                $user->save();
+
+                return $user;
+            });
         } elseif ($user->email_verified_at === null) {
             $user->email_verified_at = now();
             $user->save();

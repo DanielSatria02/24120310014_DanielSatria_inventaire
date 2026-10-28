@@ -7,15 +7,30 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockMovement extends Model
 {
+    public const TYPE_INBOUND = 'inbound';
+
+    public const TYPE_OUTBOUND = 'outbound';
+
     protected $primaryKey = 'stockMovementID';
 
     protected $fillable = [
+        'companyID',
         'productID',
         'userID',
         'skuType',
         'skuQuantity',
+        'unitPrice',
+        'totalAmount',
         'skuNote',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'unitPrice' => 'decimal:2',
+            'totalAmount' => 'decimal:2',
+        ];
+    }
 
     public function product(): BelongsTo
     {
