@@ -175,13 +175,16 @@ body.manager-page.menu-open {
     transition: background-color 140ms ease;
 }
 
-.side-link:hover,
-.side-link.is-active {
+a.side-link:hover,
+button.side-link:hover {
     background: #eef4ee;
 }
 
 .side-link.is-active {
+    background: #dcebdf;
     color: #2a6040;
+    cursor: default;
+    font-weight: 700;
 }
 
 .side-link-button {

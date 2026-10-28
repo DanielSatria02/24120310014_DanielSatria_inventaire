@@ -171,6 +171,16 @@ npm run build
 During frontend development, use `npm run dev` in a separate terminal for
 Vite's development server.
 
+## Running tests
+
+Tests also use MySQL, in a separate `inventaire_test` database so your real
+data is never touched. Create it once, then run the suite:
+
+```powershell
+C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE IF NOT EXISTS inventaire_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+php artisan test
+```
+
 ## Useful Laravel commands
 
 Create a model and its migration:

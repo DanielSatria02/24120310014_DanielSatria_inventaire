@@ -45,8 +45,17 @@
             </button>
         </div>
 
-        <a href="{{ route('account.edit') }}" @class(['side-link', 'is-active' => request()->routeIs('account.edit')])>Edit account</a>
-        <a href="{{ route('employees.create') }}" @class(['side-link', 'is-active' => request()->routeIs('employees.create')])>Add employee</a>
+        @foreach ([
+            ['dashboard', 'Dashboard'],
+            ['account.edit', 'Edit account'],
+            ['employees.create', 'Add employee'],
+        ] as [$routeName, $label])
+            @if (request()->routeIs($routeName))
+                <span class="side-link is-active" aria-current="page">{{ $label }}</span>
+            @else
+                <a href="{{ route($routeName) }}" class="side-link">{{ $label }}</a>
+            @endif
+        @endforeach
 
         <form method="POST" action="{{ route('logout') }}" class="side-menu-footer">
             @csrf
