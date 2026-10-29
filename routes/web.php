@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Inventory\CategoryController;
 use App\Http\Controllers\Inventory\DashboardController;
 use App\Http\Controllers\Inventory\EmployeeController;
 use App\Http\Controllers\Inventory\ProductController;
@@ -29,10 +30,20 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:manager')->group(function () {
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+        Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+        Route::delete('/products/{product}', [ProductController::class, 'destroy'])
+            ->middleware('throttle:6,1')
+            ->name('products.destroy');
+
+        Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+        Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
         Route::view('/account', 'pages.manager.account')->name('account.edit');
 
         Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.create');
         Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+        Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
         Route::put('/employees/{employee}/password', [EmployeeController::class, 'updatePassword'])
             ->middleware('throttle:6,1')
             ->name('employees.password');

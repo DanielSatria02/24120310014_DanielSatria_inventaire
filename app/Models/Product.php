@@ -12,7 +12,6 @@ class Product extends Model
 
     protected $fillable = [
         'categoryID',
-        'stockKeepUnit',
         'name',
         'stockQuantity',
         'minStockLevel',

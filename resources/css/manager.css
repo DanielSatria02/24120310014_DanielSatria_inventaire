@@ -644,3 +644,43 @@ button.side-link:hover {
         transition-duration: 0.01ms;
     }
 }
+
+.summary-value.is-negative { color: #b42318; }
+.summary-value.is-positive { color: #067647; }
+
+.insight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.insight-grid .panel { margin: 0; padding: 1.1rem 1.25rem; }
+@media (max-width: 860px) { .insight-grid { grid-template-columns: 1fr; } }
+
+.panel-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; }
+
+.feed-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+.feed-row:first-of-type { border-top: 0; }
+.feed-main { display: grid; gap: 0.15rem; min-width: 0; }
+.feed-title { font-weight: 600; overflow-wrap: anywhere; }
+.feed-meta { font-size: 0.8rem; opacity: 0.7; overflow-wrap: anywhere; }
+.feed-amount { font-weight: 700; white-space: nowrap; }
+.feed-empty { opacity: 0.7; padding: 0.5rem 0; }
+
+.badge-type {
+    display: inline-block;
+    margin-left: 0.4rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+.badge-type.is-in { background: #fef3f2; color: #b42318; }
+.badge-type.is-out { background: #ecfdf3; color: #067647; }

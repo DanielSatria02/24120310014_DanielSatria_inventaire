@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Inventory;
 
 use App\Models\StockMovement;
+use App\Rules\PlainText;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -30,7 +31,7 @@ class RecordStockMovementRequest extends FormRequest
                 Rule::requiredIf(fn () => $this->input('skuType') === StockMovement::TYPE_INBOUND),
                 'nullable', 'numeric', 'decimal:0,2', 'min:0', 'max:1000000000',
             ],
-            'skuNote' => ['nullable', 'string', 'max:255'],
+            'skuNote' => ['nullable', 'string', 'max:255', new PlainText],
         ];
     }
 

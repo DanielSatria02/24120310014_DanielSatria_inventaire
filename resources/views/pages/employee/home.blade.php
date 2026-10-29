@@ -10,23 +10,7 @@
         <p>Record stock coming in or going out. Every record updates your manager's financial summary.</p>
     </section>
 
-    <section class="summary-grid" aria-label="Financial summary">
-        <article class="summary-card">
-            <span class="summary-label">Inventory valuation</span>
-            <strong class="summary-value">{{ Money::format($valuation) }}</strong>
-            <span class="summary-hint">Stock × purchase price</span>
-        </article>
-        <article class="summary-card">
-            <span class="summary-label">Revenue</span>
-            <strong class="summary-value">{{ Money::format($revenue) }}</strong>
-            <span class="summary-hint">From outbound movements</span>
-        </article>
-        <article class="summary-card">
-            <span class="summary-label">Expenses</span>
-            <strong class="summary-value">{{ Money::format($expenses) }}</strong>
-            <span class="summary-hint">From inbound movements</span>
-        </article>
-    </section>
+    @include('partials.summary-cards')
 
     <section class="panel" aria-label="Products">
         <div class="toolbar">
@@ -65,10 +49,9 @@
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Name</th>
-                        <th scope="col">SKU</th>
+                        <th scope="col">Category</th>
                         <th scope="col" class="numeric">In stock</th>
                         <th scope="col" class="numeric">Min. level</th>
-                        <th scope="col" class="numeric">Purchase price</th>
                         <th scope="col" class="numeric">Selling price</th>
                         <th scope="col" class="numeric">Action</th>
                     </tr>
@@ -78,7 +61,7 @@
                         <tr>
                             <td data-label="ID">{{ $product->productID }}</td>
                             <td data-label="Name" class="product-name">{{ $product->name }}</td>
-                            <td data-label="SKU">{{ $product->stockKeepUnit }}</td>
+                            <td data-label="Category">{{ $product->category?->name ?? '—' }}</td>
                             <td data-label="In stock" class="numeric">
                                 {{ $product->stockQuantity }}
                                 @if ($product->isLowOnStock())
@@ -86,7 +69,6 @@
                                 @endif
                             </td>
                             <td data-label="Min. level" class="numeric">{{ $product->minStockLevel }}</td>
-                            <td data-label="Purchase price" class="numeric">{{ Money::format($product->purchasePrice) }}</td>
                             <td data-label="Selling price" class="numeric">{{ Money::format($product->sellingPrice) }}</td>
                             <td data-label="Action" class="numeric">
                                 <button type="button" class="button-outline"
@@ -158,10 +140,10 @@
                     </div>
 
                     <div class="form-field" data-inbound-only @if (! $inbound) hidden @endif>
-                        <label for="price-{{ $product->productID }}">Purchase price (each)</label>
+                        <label for="price-{{ $product->productID }}">Vendor price (each)</label>
                         <input id="price-{{ $product->productID }}" name="unitPrice" type="number" min="0"
                             step="0.01" inputmode="decimal" data-movement-price
-                            value="{{ $failed && old('unitPrice') !== null ? old('unitPrice') : $product->purchasePrice }}"
+                            value="{{ $failed && old('unitPrice') !== null ? old('unitPrice') : ($product->purchasePrice > 0 ? $product->purchasePrice : '') }}"
                             @class(['input-error' => $failed && $errors->recordMovement->has('unitPrice')])>
                         @if ($failed)
                             @error('unitPrice', 'recordMovement')

@@ -46,7 +46,7 @@
         </div>
 
         @php($menuItems = $user->isManager()
-            ? [['dashboard', 'Dashboard'], ['account.edit', 'Edit account'], ['employees.create', 'Add employee']]
+            ? [['dashboard', 'Dashboard'], ['categories.index', 'Categories'], ['account.edit', 'Edit account'], ['employees.create', 'Add employee']]
             : [['home', 'Home']])
         @foreach ($menuItems as [$routeName, $label])
             @if (request()->routeIs($routeName))

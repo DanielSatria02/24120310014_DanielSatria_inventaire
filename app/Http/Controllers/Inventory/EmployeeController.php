@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\StoreEmployeeRequest;
+use App\Http\Requests\Inventory\UpdateEmployeeRequest;
 use App\Models\User;
 use App\Rules\PasswordDiffersFromEmail;
 use Illuminate\Http\RedirectResponse;
@@ -38,6 +39,15 @@ class EmployeeController extends Controller
         return redirect()
             ->route('employees.create')
             ->with('status', 'Employee added.');
+    }
+
+    public function update(UpdateEmployeeRequest $request, User $employee): RedirectResponse
+    {
+        $employee->update($request->validated());
+
+        return redirect()
+            ->route('employees.create')
+            ->with('status', 'Employee updated.');
     }
 
     public function updatePassword(Request $request, User $employee): RedirectResponse

@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\Inventory;
 
+use App\Rules\PlainText;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends FormRequest
 {
+    protected $errorBag = 'addProduct';
+
     public function authorize(): bool
     {
         $user = $this->user();
@@ -19,19 +22,15 @@ class StoreProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        $price = ['required', 'numeric', 'decimal:0,2', 'min:0', 'max:9999999999999.99'];
-
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'stockKeepUnit' => [
-                'required',
-                'string',
-                'max:100',
-                Rule::unique('products', 'stockKeepUnit')->where('companyID', $this->user()->companyID),
+            'name' => ['required', 'string', 'max:255', new PlainText],
+            'categoryID' => [
+                'nullable',
+                'integer',
+                Rule::exists('categories', 'categoryID')->where('companyID', $this->user()->companyID),
             ],
             'minStockLevel' => ['required', 'integer', 'min:0', 'max:1000000'],
-            'purchasePrice' => $price,
-            'sellingPrice' => $price,
+            'sellingPrice' => ['required', 'numeric', 'decimal:0,2', 'min:0', 'max:9999999999999.99'],
         ];
     }
 
@@ -41,9 +40,8 @@ class StoreProductRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'stockKeepUnit' => 'stock keeping unit',
+            'categoryID' => 'category',
             'minStockLevel' => 'minimum stock level',
-            'purchasePrice' => 'purchase price',
             'sellingPrice' => 'selling price',
         ];
     }

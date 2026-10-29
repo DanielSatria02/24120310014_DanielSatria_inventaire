@@ -21,6 +21,11 @@ class Company extends Model
         return $this->hasMany(Product::class, 'companyID', 'companyID');
     }
 
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class, 'companyID', 'companyID');
+    }
+
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class, 'companyID', 'companyID');

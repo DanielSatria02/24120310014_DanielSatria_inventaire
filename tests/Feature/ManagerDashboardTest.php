@@ -30,9 +30,7 @@ class ManagerDashboardTest extends TestCase
     {
         return array_merge([
             'name' => 'Laptop',
-            'stockKeepUnit' => 'LAP-001',
             'minStockLevel' => 5,
-            'purchasePrice' => '1000.50',
             'sellingPrice' => '1500',
         ], $overrides);
     }
@@ -92,7 +90,6 @@ class ManagerDashboardTest extends TestCase
         ]));
         $company->products()->create($this->productData([
             'name' => 'Mouse',
-            'stockKeepUnit' => 'MOU-001',
             'stockQuantity' => 4,
             'purchasePrice' => 25,
         ]));
@@ -132,8 +129,8 @@ class ManagerDashboardTest extends TestCase
     {
         $company = Company::create(['name' => 'Acme']);
         $manager = $this->makeUser($company, User::ROLE_MANAGER);
-        $company->products()->create($this->productData(['name' => 'Blue Laptop']));
-        $company->products()->create($this->productData(['name' => 'Red Mouse', 'stockKeepUnit' => 'MOU-001']));
+        $company->products()->create($this->productData(['name' => 'Blue Laptop', 'stockQuantity' => 50]));
+        $company->products()->create($this->productData(['name' => 'Red Mouse', 'stockQuantity' => 50]));
 
         $this->actingAs($manager)->get('/dashboard?q=laptop')
             ->assertOk()
@@ -158,10 +155,8 @@ class ManagerDashboardTest extends TestCase
         $this->assertDatabaseHas('products', [
             'companyID' => $company->companyID,
             'name' => 'Laptop',
-            'stockKeepUnit' => 'LAP-001',
             'stockQuantity' => 0,
             'minStockLevel' => 5,
-            'purchasePrice' => '1000.50',
             'sellingPrice' => '1500.00',
         ]);
     }
@@ -173,31 +168,13 @@ class ManagerDashboardTest extends TestCase
 
         $this->actingAs($manager)->from('/dashboard')->post('/products', [
             'name' => '',
-            'stockKeepUnit' => '',
             'minStockLevel' => -1,
-            'purchasePrice' => 'free',
             'sellingPrice' => '1.999',
         ])->assertRedirect('/dashboard')
-            ->assertSessionHasErrors(['name', 'stockKeepUnit', 'minStockLevel', 'purchasePrice', 'sellingPrice']);
+            ->assertSessionHasErrors(['name', 'minStockLevel', 'sellingPrice'], null, 'addProduct');
 
         $this->assertDatabaseCount('products', 0);
     }
-
-    public function test_sku_must_be_unique_within_a_company_but_not_across_companies(): void
-    {
-        $company = Company::create(['name' => 'Acme']);
-        $other = Company::create(['name' => 'Other Co']);
-        $manager = $this->makeUser($company, User::ROLE_MANAGER);
-        $otherManager = $this->makeUser($other, User::ROLE_MANAGER, 'other@example.com');
-
-        $this->actingAs($manager)->post('/products', $this->productData())->assertRedirect('/dashboard');
-
-        $this->actingAs($manager)->from('/dashboard')->post('/products', $this->productData())
-            ->assertSessionHasErrors('stockKeepUnit');
-
-        $this->actingAs($otherManager)->post('/products', $this->productData())
-            ->assertSessionHasNoErrors();
-
-        $this->assertDatabaseCount('products', 2);
-    }
 }
+
+

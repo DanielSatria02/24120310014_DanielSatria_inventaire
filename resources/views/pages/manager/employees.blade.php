@@ -45,6 +45,8 @@
                             <td data-label="Action" class="numeric">
                                 <div class="row-actions">
                                     <button type="button" class="button-outline"
+                                        data-dialog-open="edit-employee-{{ $employee->userID }}">Edit</button>
+                                    <button type="button" class="button-outline"
                                         data-dialog-open="password-employee-{{ $employee->userID }}">Change password</button>
                                     <button type="button" class="button-danger"
                                         data-dialog-open="delete-employee-{{ $employee->userID }}">Delete</button>
@@ -207,6 +209,52 @@
                 <div class="modal-actions">
                     <button type="button" class="button-secondary" data-dialog-close>Cancel</button>
                     <button type="submit" class="button-danger button-danger-solid">Delete employee</button>
+                </div>
+            </form>
+        </dialog>
+    @endforeach
+
+    @foreach ($employees as $employee)
+        @php($editFailed = (int) old('employeeID') === $employee->userID && $errors->editEmployee->any())
+        <dialog id="edit-employee-{{ $employee->userID }}" class="modal"
+            aria-labelledby="edit-title-{{ $employee->userID }}" @if ($editFailed) data-open-on-load @endif>
+            <form method="POST" action="{{ route('employees.update', $employee) }}" class="modal-body">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="employeeID" value="{{ $employee->userID }}">
+
+                <div class="modal-head">
+                    <h2 id="edit-title-{{ $employee->userID }}">Edit employee</h2>
+                    <button type="button" class="icon-button" data-dialog-close aria-label="Close">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-field span-2">
+                        <label for="edit-name-{{ $employee->userID }}">Name</label>
+                        <input id="edit-name-{{ $employee->userID }}" name="name" type="text" maxlength="255" required
+                            value="{{ $editFailed ? old('name') : $employee->name }}"
+                            @class(['input-error' => $editFailed && $errors->editEmployee->has('name')])>
+                        @if ($editFailed && $errors->editEmployee->has('name'))
+                            <p class="field-error">{{ $errors->editEmployee->first('name') }}</p>
+                        @endif
+                    </div>
+                    <div class="form-field span-2">
+                        <label for="edit-email-{{ $employee->userID }}">Email</label>
+                        <input id="edit-email-{{ $employee->userID }}" name="email" type="email" maxlength="255" required
+                            value="{{ $editFailed ? old('email') : $employee->email }}"
+                            @class(['input-error' => $editFailed && $errors->editEmployee->has('email')])>
+                        @if ($editFailed && $errors->editEmployee->has('email'))
+                            <p class="field-error">{{ $errors->editEmployee->first('email') }}</p>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="button-secondary" data-dialog-close>Cancel</button>
+                    <button type="submit" class="button-primary">Save changes</button>
                 </div>
             </form>
         </dialog>

@@ -34,12 +34,21 @@ The `.env` file contains machine-specific settings and should not be committed.
   another company's data.
 - `/dashboard` is protected by login plus the `role:manager` middleware
   (employees get 403). It shows:
-  - **Revenue**: sum of `totalAmount` of outbound movements.
-  - **Expenses**: sum of `totalAmount` of inbound movements.
-  - **Inventory valuation**: sum of `stockQuantity x purchasePrice`.
-  - A searchable product list and an **Add item** popup (validated on the
-    server; the SKU must be unique inside the company).
-- The header menu (top left) opens a sliding drawer with Dashboard, Edit
+  - Four cards: **Revenue** (outbound), **Expenses** (inbound), **Net profit /
+    loss** (revenue minus expenses) and **Inventory valuation**
+    (`stockQuantity x latest purchase price`, a "last cost" method).
+  - **Low-stock alerts** (stock at or below the minimum) and **Recent stock
+    movements** (what, how many, amount, who recorded it, when).
+  - A searchable product table with **Add / Edit / Delete**. A product is just
+    an auto-assigned ID, a name, an optional category, a selling price and a
+    minimum stock level. There is no SKU. Stock is never typed in by the
+    manager; it changes only through recorded movements. The purchase price is
+    set by the vendor, so it is captured automatically from the latest
+    restock. Deleting a product needs the manager's password and is blocked
+    once the product has stock movements.
+- **Categories** (`/categories`): managers add, edit and delete categories
+  (unique per company). Deleting one keeps its products, which become
+  uncategorised.- The header menu (top left) opens a sliding drawer with Dashboard, Edit
   account, Add employee and Log out. The page you are on is highlighted and
   not clickable. Edit account is a placeholder for now.
 - **Employee home** (`/home` for employees): same three summary cards and
@@ -48,7 +57,7 @@ The `.env` file contains machine-specific settings and should not be committed.
   - *Shipped out / sold*: stock goes down and the amount (quantity x the
     product's selling price) is added to **revenue**.
   - *Restocked / purchased*: stock goes up and the amount (quantity x the
-    purchase price the employee types) is added to **expenses**.
+    vendor price the employee types, which also becomes the product's latest\n    purchase price) is added to **expenses**.
   - Shipping more than is in stock is rejected and nothing changes. The stock
     row is locked inside a database transaction, so two employees cannot
     oversell the same item.
@@ -57,13 +66,22 @@ The `.env` file contains machine-specific settings and should not be committed.
 - Managers can **change an employee's password** (they must enter their own
   password; the employee is signed out everywhere).
 - **Employees** (`/employees`): managers add an employee (name, email,
-  password) through a popup. The account is created with the `employee` role
+  password) through a popup, and can edit an employee's name and email. Employees cannot edit\n  their own details or password; only their manager can. The account is created with the `employee` role
   in the manager's company. To delete one, the manager must re-enter their
   own password. Only employees of the same company can be deleted, and not
   ones that already have recorded stock movements (to keep the ledger intact).
 - **Password policy** (registration and employees), following OWASP/ASVS:
   12 to 64 characters, no forced symbol or case rules, no leading or trailing
   space, and not the same as the email. Passwords are stored hashed.
+## Security
+
+- **Passwords**: OWASP-style policy (above), hashed with bcrypt (cost 12) and never stored or logged in plain text.
+- **SQL injection**: all database access uses Eloquent / query-builder parameter binding; user input is never concatenated into SQL.
+- **XSS**: Blade escapes every output with {{ }}; free-text fields also reject < and > (App\Rules\PlainText); a strict Content-Security-Policy blocks inline and third-party scripts.
+- **Other headers**: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy (and HSTS over HTTPS).
+- **CORS**: config/cors.php applies to no route, so other sites cannot call the app from a browser; only APP_URL is listed as an origin.
+- **CSRF** tokens on every form, role middleware plus per-company ownership checks on every record, throttled sensitive actions.
+
 - Amounts show as "Rp". Change `app/Support/Money.php` to use another currency.
 - New migrations: `companies`, plus company/role on users and company/prices on
   products and stock movements.

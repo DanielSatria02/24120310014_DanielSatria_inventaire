@@ -159,7 +159,7 @@ class EmployeeManagementTest extends TestCase
         $manager = $this->makeUser($company, User::ROLE_MANAGER, 'm@example.com');
         $employee = $this->makeUser($company, User::ROLE_EMPLOYEE, 'e@example.com');
         $product = $company->products()->create([
-            'name' => 'Laptop', 'stockKeepUnit' => 'L-1', 'minStockLevel' => 1,
+            'name' => 'Laptop', 'minStockLevel' => 1,
             'purchasePrice' => 10, 'sellingPrice' => 20,
         ]);
         StockMovement::create([
@@ -174,3 +174,4 @@ class EmployeeManagementTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'e@example.com']);
     }
 }
+

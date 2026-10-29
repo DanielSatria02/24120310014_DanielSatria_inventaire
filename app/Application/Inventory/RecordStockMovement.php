@@ -46,6 +46,8 @@ final class RecordStockMovement
                     throw StockMovementRejectedException::amountTooLarge();
                 }
                 $product->stockQuantity += $quantity;
+                // The vendor's latest price becomes the product's cost basis for valuation.
+                $product->purchasePrice = $unitPrice;
             } else {
                 if ($quantity > $product->stockQuantity) {
                     throw StockMovementRejectedException::insufficientStock(

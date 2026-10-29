@@ -5,28 +5,23 @@
 @section('title', 'Dashboard')
 
 @section('content')
+    @php
+        $addFailed = $errors->addProduct->any();
+        $addValues = [
+            'name' => $addFailed ? old('name') : '',
+            'categoryID' => $addFailed ? old('categoryID') : '',
+            'sellingPrice' => $addFailed ? old('sellingPrice') : '',
+            'minStockLevel' => $addFailed ? old('minStockLevel') : 0,
+        ];
+    @endphp
+
     <section class="page-heading">
         <h1>Dashboard</h1>
         <p>Your inventory value and recorded revenue and expenses at a glance.</p>
     </section>
 
-    <section class="summary-grid" aria-label="Financial summary">
-        <article class="summary-card">
-            <span class="summary-label">Inventory valuation</span>
-            <strong class="summary-value">{{ Money::format($valuation) }}</strong>
-            <span class="summary-hint">Stock × purchase price</span>
-        </article>
-        <article class="summary-card">
-            <span class="summary-label">Revenue</span>
-            <strong class="summary-value">{{ Money::format($revenue) }}</strong>
-            <span class="summary-hint">From outbound movements</span>
-        </article>
-        <article class="summary-card">
-            <span class="summary-label">Expenses</span>
-            <strong class="summary-value">{{ Money::format($expenses) }}</strong>
-            <span class="summary-hint">From inbound movements</span>
-        </article>
-    </section>
+    @include('partials.summary-cards')
+    @include('partials.insight-panels')
 
     <section class="panel" aria-label="Products">
         <div class="toolbar">
@@ -57,6 +52,10 @@
             <p class="field-error panel-error">{{ $message }}</p>
         @enderror
 
+        @if ($errors->deleteProduct->has('product'))
+            <div class="notice panel-error" role="alert">{{ $errors->deleteProduct->first('product') }}</div>
+        @endif
+
         @if ($products->isEmpty())
             <div class="empty-state">
                 @if ($search !== '')
@@ -73,11 +72,12 @@
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Name</th>
-                        <th scope="col">SKU</th>
+                        <th scope="col">Category</th>
                         <th scope="col" class="numeric">In stock</th>
                         <th scope="col" class="numeric">Min. level</th>
-                        <th scope="col" class="numeric">Purchase price</th>
                         <th scope="col" class="numeric">Selling price</th>
+                        <th scope="col" class="numeric">Latest purchase price</th>
+                        <th scope="col" class="numeric">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -85,7 +85,7 @@
                         <tr>
                             <td data-label="ID">{{ $product->productID }}</td>
                             <td data-label="Name" class="product-name">{{ $product->name }}</td>
-                            <td data-label="SKU">{{ $product->stockKeepUnit }}</td>
+                            <td data-label="Category">{{ $product->category?->name ?? '—' }}</td>
                             <td data-label="In stock" class="numeric">
                                 {{ $product->stockQuantity }}
                                 @if ($product->isLowOnStock())
@@ -93,8 +93,18 @@
                                 @endif
                             </td>
                             <td data-label="Min. level" class="numeric">{{ $product->minStockLevel }}</td>
-                            <td data-label="Purchase price" class="numeric">{{ Money::format($product->purchasePrice) }}</td>
                             <td data-label="Selling price" class="numeric">{{ Money::format($product->sellingPrice) }}</td>
+                            <td data-label="Latest purchase price" class="numeric">
+                                {{ $product->purchasePrice > 0 ? Money::format($product->purchasePrice) : '—' }}
+                            </td>
+                            <td data-label="Actions" class="numeric">
+                                <div class="row-actions">
+                                    <button type="button" class="button-outline"
+                                        data-dialog-open="edit-product-{{ $product->productID }}">Edit</button>
+                                    <button type="button" class="button-danger"
+                                        data-dialog-open="delete-product-{{ $product->productID }}">Delete</button>
+                                </div>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -107,7 +117,7 @@
     </section>
 
     <dialog id="add-item-dialog" class="modal" aria-labelledby="add-item-title"
-        @if ($errors->any() && ! $errors->has('q')) data-open-on-load @endif>
+        @if ($addFailed) data-open-on-load @endif>
         <form method="POST" action="{{ route('products.store') }}" class="modal-body">
             @csrf
 
@@ -120,57 +130,17 @@
                     </svg>
                 </button>
             </div>
-            <p class="modal-intro">An ID is assigned automatically once the item is saved.</p>
+            <p class="modal-intro">
+                An ID is assigned automatically. Stock arrives when your team records a restock, and the
+                purchase price comes from that restock.
+            </p>
 
-            <div class="form-grid">
-                <div class="form-field span-2">
-                    <label for="name">Product name</label>
-                    <input id="name" name="name" type="text" value="{{ old('name') }}" maxlength="255" required
-                        class="@error('name') input-error @enderror">
-                    @error('name')
-                        <p class="field-error">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="form-field">
-                    <label for="stockKeepUnit">Stock keeping unit (SKU)</label>
-                    <input id="stockKeepUnit" name="stockKeepUnit" type="text" value="{{ old('stockKeepUnit') }}"
-                        maxlength="100" required class="@error('stockKeepUnit') input-error @enderror">
-                    @error('stockKeepUnit')
-                        <p class="field-error">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="form-field">
-                    <label for="minStockLevel">Minimum stock level</label>
-                    <input id="minStockLevel" name="minStockLevel" type="number" min="0" step="1"
-                        inputmode="numeric" value="{{ old('minStockLevel', 0) }}" required
-                        class="@error('minStockLevel') input-error @enderror">
-                    @error('minStockLevel')
-                        <p class="field-error">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="form-field">
-                    <label for="purchasePrice">Purchase price</label>
-                    <input id="purchasePrice" name="purchasePrice" type="number" min="0" step="0.01"
-                        inputmode="decimal" value="{{ old('purchasePrice') }}" required
-                        class="@error('purchasePrice') input-error @enderror">
-                    @error('purchasePrice')
-                        <p class="field-error">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="form-field">
-                    <label for="sellingPrice">Selling price</label>
-                    <input id="sellingPrice" name="sellingPrice" type="number" min="0" step="0.01"
-                        inputmode="decimal" value="{{ old('sellingPrice') }}" required
-                        class="@error('sellingPrice') input-error @enderror">
-                    @error('sellingPrice')
-                        <p class="field-error">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
+            @include('partials.product-fields', [
+                'prefix' => 'add',
+                'bag' => 'addProduct',
+                'values' => $addValues,
+                'categories' => $categories,
+            ])
 
             <div class="modal-actions">
                 <button type="button" class="button-secondary" data-dialog-close>Cancel</button>
@@ -178,4 +148,85 @@
             </div>
         </form>
     </dialog>
+
+    @foreach ($products as $product)
+        @php
+            $editFailed = (int) old('editProductID') === $product->productID && $errors->editProduct->any();
+            $editValues = [
+                'name' => $editFailed ? old('name') : $product->name,
+                'categoryID' => $editFailed ? old('categoryID') : $product->categoryID,
+                'sellingPrice' => $editFailed ? old('sellingPrice') : $product->sellingPrice,
+                'minStockLevel' => $editFailed ? old('minStockLevel') : $product->minStockLevel,
+            ];
+            $deleteFailed = session('deleteProductID') === $product->productID && $errors->deleteProduct->has('password');
+        @endphp
+
+        <dialog id="edit-product-{{ $product->productID }}" class="modal"
+            aria-labelledby="edit-title-{{ $product->productID }}" @if ($editFailed) data-open-on-load @endif>
+            <form method="POST" action="{{ route('products.update', $product) }}" class="modal-body">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="editProductID" value="{{ $product->productID }}">
+
+                <div class="modal-head">
+                    <h2 id="edit-title-{{ $product->productID }}">Edit item</h2>
+                    <button type="button" class="icon-button" data-dialog-close aria-label="Close">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6L6 18" />
+                        </svg>
+                    </button>
+                </div>
+                <p class="modal-intro">Item #{{ $product->productID }} · {{ $product->stockQuantity }} in stock.
+                    Stock changes only through recorded movements.</p>
+
+                @include('partials.product-fields', [
+                    'prefix' => 'edit-'.$product->productID,
+                    'bag' => 'editProduct',
+                    'values' => $editValues,
+                    'categories' => $categories,
+                ])
+
+                <div class="modal-actions">
+                    <button type="button" class="button-secondary" data-dialog-close>Cancel</button>
+                    <button type="submit" class="button-primary">Save changes</button>
+                </div>
+            </form>
+        </dialog>
+
+        <dialog id="delete-product-{{ $product->productID }}" class="modal"
+            aria-labelledby="delete-title-{{ $product->productID }}" @if ($deleteFailed) data-open-on-load @endif>
+            <form method="POST" action="{{ route('products.destroy', $product) }}" class="modal-body">
+                @csrf
+                @method('DELETE')
+
+                <div class="modal-head">
+                    <h2 id="delete-title-{{ $product->productID }}">Delete item</h2>
+                    <button type="button" class="icon-button" data-dialog-close aria-label="Close">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6L6 18" />
+                        </svg>
+                    </button>
+                </div>
+                <p class="modal-intro">
+                    This permanently removes <strong>{{ $product->name }}</strong>. Enter your password to confirm.
+                </p>
+
+                <div class="form-field">
+                    <label for="delete-password-{{ $product->productID }}">Your password</label>
+                    <input id="delete-password-{{ $product->productID }}" name="password" type="password" required
+                        autocomplete="current-password" @class(['input-error' => $deleteFailed])>
+                    @if ($deleteFailed)
+                        <p class="field-error">{{ $errors->deleteProduct->first('password') }}</p>
+                    @endif
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="button-secondary" data-dialog-close>Cancel</button>
+                    <button type="submit" class="button-danger button-danger-solid">Delete item</button>
+                </div>
+            </form>
+        </dialog>
+    @endforeach
 @endsection

@@ -42,7 +42,7 @@ class EmployeeHomeTest extends TestCase
     private function laptop(int $stock = 10, ?Company $company = null)
     {
         return ($company ?? $this->company)->products()->create([
-            'name' => 'Laptop', 'stockKeepUnit' => 'LAP-1', 'stockQuantity' => $stock,
+            'name' => 'Laptop', 'stockQuantity' => $stock,
             'minStockLevel' => 2, 'purchasePrice' => 100, 'sellingPrice' => 150,
         ]);
     }
@@ -54,7 +54,6 @@ class EmployeeHomeTest extends TestCase
         $this->actingAs($this->employee)->get('/home')
             ->assertOk()
             ->assertSee('Laptop')
-            ->assertSee('LAP-1')
             ->assertSee('Update stock')
             ->assertSee('Log out')
             ->assertDontSee('Add item')
@@ -80,7 +79,7 @@ class EmployeeHomeTest extends TestCase
     {
         $other = Company::create(['name' => 'Other']);
         $other->products()->create([
-            'name' => 'Secret Widget', 'stockKeepUnit' => 'S-1', 'minStockLevel' => 0,
+            'name' => 'Secret Widget', 'minStockLevel' => 0,
             'purchasePrice' => 1, 'sellingPrice' => 2,
         ]);
 
@@ -254,3 +253,4 @@ class EmployeeHomeTest extends TestCase
         $this->actingAs($this->employee)->put("/employees/{$this->employee->userID}/password", $body)->assertForbidden();
     }
 }
+
