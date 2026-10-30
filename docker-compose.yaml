@@ -32,9 +32,6 @@ services:
       # instead of being hidden by the bind mount above.
       - vendor:/var/www/html/vendor
       - public-build:/var/www/html/public/build
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       - inventaire
 
