@@ -73,6 +73,8 @@ The `.env` file contains machine-specific settings and should not be committed.
 - **Password policy** (registration and employees), following OWASP/ASVS:
   12 to 64 characters, no forced symbol or case rules, no leading or trailing
   space, and not the same as the email. Passwords are stored hashed.
+
+
 ## Security
 
 - **Passwords**: OWASP-style policy (above), hashed with bcrypt (cost 12) and never stored or logged in plain text.
@@ -85,6 +87,7 @@ The `.env` file contains machine-specific settings and should not be committed.
 - Amounts show as "Rp". Change `app/Support/Money.php` to use another currency.
 - New migrations: `companies`, plus company/role on users and company/prices on
   products and stock movements.
+
 
 ## Application architecture
 
