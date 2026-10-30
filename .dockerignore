@@ -1,0 +1,33 @@
+.git
+.gitignore
+.gitattributes
+.dockerignore
+Dockerfile
+docker-compose.yaml
+
+# Local environment files (the image must not ship secrets).
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated assets (rebuilt inside the image).
+node_modules
+vendor
+public/build
+public/hot
+public/storage
+
+# Runtime leftovers.
+storage/app/public/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+bootstrap/cache/*.php
+.phpunit.result.cache
+.phpunit.cache
+
+# Editor / OS noise.
+.idea
+.vscode
+.DS_Store
