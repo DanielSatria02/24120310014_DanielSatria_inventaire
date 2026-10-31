@@ -5,26 +5,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        UID: ${UID:-1000}
-        GID: ${GID:-1000}
     image: inventaire-app
     restart: unless-stopped
     working_dir: /var/www/html
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
+      # The database is external: credentials are read from your local .env.
       APP_URL: http://localhost:8000
-      DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: "3306"
-      DB_DATABASE: inventaire
-      DB_USERNAME: inventaire
-      DB_PASSWORD: secret
-      SESSION_DRIVER: database
-      CACHE_STORE: database
-      QUEUE_CONNECTION: database
       LOG_CHANNEL: stderr
+      # Set to false if you do not want `php artisan migrate` on every start.
+      RUN_MIGRATIONS: "true"
     volumes:
       # Source code (live edits without rebuilding the image).
       - ./:/var/www/html
@@ -32,6 +21,15 @@ services:
       # instead of being hidden by the bind mount above.
       - vendor:/var/www/html/vendor
       - public-build:/var/www/html/public/build
+    healthcheck:
+      # PHP-FPM only starts after the entrypoint has run migrations, so this
+      # also means the application is ready. Makes `docker compose up --wait`
+      # actually wait for a usable stack.
+      test: ["CMD-SHELL", "php -r 'exit(@fsockopen(\"127.0.0.1\", 9000) ? 0 : 1);'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
     networks:
       - inventaire
 
@@ -44,8 +42,14 @@ services:
       - ./:/var/www/html:ro
       - public-build:/var/www/html/public/build:ro
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     networks:
       - inventaire
 
@@ -59,7 +63,7 @@ services:
       - ./:/var/www/html
       - node-modules:/var/www/html/node_modules
       - public-build:/var/www/html/public/build
-    command: sh -c "npm install --no-audit --no-fund && npm run build"
+    command: sh -c "npm ci --no-audit --no-fund && npm run build"
     networks:
       - inventaire
 
@@ -74,7 +78,7 @@ services:
       - node-modules:/var/www/html/node_modules
     ports:
       - "5173:5173"
-    command: sh -c "npm install --no-audit --no-fund && npm run dev -- --host 0.0.0.0"
+    command: sh -c "npm ci --no-audit --no-fund && npm run dev -- --host 0.0.0.0"
     depends_on:
       - app
     networks:
@@ -83,7 +87,6 @@ services:
 volumes:
   vendor:
   public-build:
-  db-data:
   node-modules:
 
 networks:
